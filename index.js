@@ -1,6 +1,6 @@
-function add(a, b) {
-    const result = a + b;
-    console.log(`Adding ${a} + ${b} = ${result}`);
+function add(a, b, c) {
+    const result = a + b + c;
+    console.log(`Adding numbers ${a} + ${b} + ${c}= ${result}`);
     return result;
   }
   
