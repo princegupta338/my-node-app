@@ -1,0 +1,28 @@
+# File: .github/workflows/deploy.yml
+name: Deploy Workflow
+
+on:
+  workflow_run:
+    workflows: ["ci.yml"]
+    types:
+      - completed
+
+jobs:
+  deploy:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download test output artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: test-output
+          path: ./artifact
+
+      - name: Show contents of test-output.txt
+        run: |
+          echo "Test output from previous workflow:"
+          cat ./artifact/test-output.txt
+
+      # 🔧 Optional: add deploy or further processing steps here
+
