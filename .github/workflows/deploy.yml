@@ -2,12 +2,12 @@ name: Deploy Workflow
 
 on:
   workflow_run:
-    workflows: ["Node.js CI"]  # Make sure this matches ci.yml
+    workflows: ["Node.js CI"]
     types:
       - completed
 
 permissions:
-  actions: read  # ✅ Needed to access artifacts from another workflow
+  actions: read
   contents: read
 
 jobs:
@@ -16,13 +16,39 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Download test output artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: test-logs   # ✅ This must match the name in ci.yml
-          path: ./artifact
+      - name: Download artifact from triggering workflow
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+          ARTIFACT_NAME: test-logs
+        run: |
+          echo "Getting artifacts for run ID $RUN_ID"
+          
+          # Get list of artifacts for the triggering workflow run
+          curl -s -H "Authorization: token $GITHUB_TOKEN" \
+            "https://api.github.com/repos/${{ github.repository }}/actions/runs/$RUN_ID/artifacts" > artifacts.json
+
+          cat artifacts.json | jq .
+
+          # Extract the download URL for the desired artifact
+          ARTIFACT_URL=$(jq -r \
+            --arg NAME "$ARTIFACT_NAME" \
+            '.artifacts[] | select(.name == $NAME) | .archive_download_url' artifacts.json)
+
+          if [ -z "$ARTIFACT_URL" ]; then
+            echo "❌ Artifact '$ARTIFACT_NAME' not found."
+            exit 1
+          fi
+
+          echo "✅ Downloading artifact from: $ARTIFACT_URL"
+
+          # Download the artifact ZIP
+          curl -L -H "Authorization: token $GITHUB_TOKEN" \
+            "$ARTIFACT_URL" --output artifact.zip
+
+          unzip artifact.zip -d ./artifact
 
       - name: Show contents of test-output.txt
         run: |
-          echo "Test output from previous workflow:"
+          echo "Test output:"
           cat ./artifact/test-output.txt
