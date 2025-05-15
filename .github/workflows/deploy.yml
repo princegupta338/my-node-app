@@ -3,7 +3,7 @@ name: Deploy Workflow
 
 on:
   workflow_run:
-    workflows: ["ci.yml"]
+    workflows: ["Node.js CI"]  # Make sure this matches the `name:` in ci.yml
     types:
       - completed
 
@@ -16,13 +16,10 @@ jobs:
       - name: Download test output artifact
         uses: actions/download-artifact@v4
         with:
-          name: test-output
+          name: test-logs  # ✅ Match artifact name from ci.yml
           path: ./artifact
 
       - name: Show contents of test-output.txt
         run: |
           echo "Test output from previous workflow:"
           cat ./artifact/test-output.txt
-
-      # 🔧 Optional: add deploy or further processing steps here
-
