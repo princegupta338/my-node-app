@@ -22,7 +22,7 @@ jobs:
           RUN_ID: ${{ github.event.workflow_run.id }}
           ARTIFACT_NAME: test-logs
         run: |
-          echo "Getting artifacts for run ID $RUN_ID"
+          echo "Getting test artifacts from previous workflow for run ID $RUN_ID"
           
           # Get list of artifacts for the triggering workflow run
           curl -s -H "Authorization: token $GITHUB_TOKEN" \
