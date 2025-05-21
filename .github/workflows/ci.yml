@@ -1,4 +1,3 @@
-
 name: Node.js CI/CD
 
 on:
@@ -94,8 +93,8 @@ jobs:
 
       - name: Set version
         run: |
-          VERSION=$(cat version.txt)   # "This reads the contents of version.txt into a shell variable called VERSION.""
-          echo "VERSION=$VERSION" >> $GITHUB_ENV  # "This tells GitHub Actions to persist this variable as an environment variable named VERSION for the rest of the current job.""
+          VERSION=$(cat version.txt)
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
 
       - name: Download versioned test logs
         uses: actions/download-artifact@v4
@@ -118,3 +117,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Notify Slack
+        if: always()  # Run even if a previous step fails
+        run: |
+          curl -X POST -H 'Content-type: application/json' --data "{
+            \"text\": \"🚀 *Deployment Notification*: Version $VERSION has been deployed to *PROD* from GitHub Actions.\"
+          }" $SLACK_WEBHOOK_URL
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
