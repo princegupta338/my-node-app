@@ -74,7 +74,7 @@ jobs:
       - name: Deploy to Dev
         run: |
           echo "🚀 Deploying $VERSION to DEV environment"
-          echo "DEV ENV: Showing contents of test-output.txt:"
+          echo "DEV ENV: Showing previous contents of test-output.txt:"
           cat test-output.txt
 
   deploy-prod:
